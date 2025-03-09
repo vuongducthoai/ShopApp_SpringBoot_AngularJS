@@ -16,6 +16,7 @@ CREATE TABLE users (
 );
 
 
+
 CREATE TABLE roles(
 	id INT PRIMARY KEY,
     name VARCHAR(20) NOT NULL
@@ -64,6 +65,18 @@ CREATE TABLE products (
     category_id INT COMMENT 'Mã danh mục',
     FOREIGN KEY (category_id) REFERENCES categories(id) 
 );
+
+
+CREATE TABLE product_images(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	product_id INT,
+    image_url VARCHAR(300),
+    FOREIGN KEY (product_id) REFERENCES products(id),
+    CONSTRAINT fk_product_images_id
+		FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+
 
 -- Đặt hàng - Orders
 CREATE TABLE orders(
