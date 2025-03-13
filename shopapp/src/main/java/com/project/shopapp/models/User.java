@@ -11,6 +11,7 @@ import java.sql.Date;
 @Data
 @Getter
 @Setter
+@Builder
 @Table(name = "tables")
 public class User {
     @Id

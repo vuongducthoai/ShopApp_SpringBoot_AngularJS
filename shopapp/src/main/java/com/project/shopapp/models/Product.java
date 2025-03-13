@@ -11,6 +11,7 @@ import lombok.*;
 @Getter
 @Setter
 @Table(name = "products")
+@Builder
 public class Product extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

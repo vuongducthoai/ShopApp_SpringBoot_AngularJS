@@ -10,6 +10,7 @@ import lombok.*;
 @Getter
 @Data
 @Table(name = "product_images")
+@Builder
 public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
