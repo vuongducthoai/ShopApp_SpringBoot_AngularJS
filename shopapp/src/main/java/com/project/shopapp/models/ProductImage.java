@@ -12,6 +12,7 @@ import lombok.*;
 @Table(name = "product_images")
 @Builder
 public class ProductImage {
+    public static final int MAXIMUM_IMAGE_PER_PRODUCT = 5;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

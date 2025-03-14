@@ -15,6 +15,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ProductDTO {
     @NotBlank(message = "Title is required")
     @Size(min = 3, max = 200, message = "Title must be between 3 and 200 characters")
@@ -27,7 +28,7 @@ public class ProductDTO {
     private String thumbnail;
     private String description;
 
-    @JsonProperty("category_id")  // Dung de chi dinh rang thuoc tinh categoryId trong Java se tuong ung voi khoa category_id trong json
+    @JsonProperty("category_id") // Dung de chi dinh rang thuoc tinh categoryId trong Java se tuong ung voi khoa category_id trong json
     private int categoryId;
 
     private List<MultipartFile> files;

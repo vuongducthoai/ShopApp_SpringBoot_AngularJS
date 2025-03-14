@@ -28,6 +28,4 @@ public class BaseEntity {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
-
-
 }
