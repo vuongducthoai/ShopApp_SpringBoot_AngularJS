@@ -2,15 +2,14 @@ package com.project.shopapp.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
+@Setter
 public class OrderDetailDTO {
     @JsonProperty("order_id")
     @Min(value = 1, message = "Order's ID must be > 0")

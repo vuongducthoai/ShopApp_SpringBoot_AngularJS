@@ -1,6 +1,8 @@
 package com.project.shopapp.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -31,6 +33,7 @@ public class UserDTO {
     private String retypePassword;
 
     @JsonProperty("date_of_birth")
+    @Temporal(TemporalType.DATE)
     private Date dateOfBirth;
 
     @JsonProperty("facebook_account_id")

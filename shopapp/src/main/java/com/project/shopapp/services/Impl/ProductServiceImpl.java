@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import java.util.List;
 
 import java.util.Optional;
 
@@ -55,19 +56,13 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public Page<ProductResponse> getAllProducts(PageRequest pageRequest) {
         // Lay danh sach san pham theo trang (page) va gioi han (limit)
-        return productRepository.findAll(pageRequest).map(product ->{
-             ProductResponse productResponse = ProductResponse
-                    .builder()
-                    .name(product.getName())
-                    .price(product.getPrice())
-                    .description(product.getDescription())
-                    .thumbnail(product.getThumbnail())
-                    .categoryId(Math.toIntExact(product.getCategory().getId()))
-                     .build();
-             productResponse.setCreatedAt(product.getCreatedAt());
-             productResponse.setUpdatedAt(product.getUpdatedAt());
-             return productResponse;
-        });
+        return productRepository.findAll(pageRequest).map(ProductResponse::fromProduct
+        );
+    }
+
+    @Override
+    public List<Product> getAllProducts() {
+        return productRepository.findAllProducts();
     }
 
     @Override
@@ -126,5 +121,9 @@ public class ProductServiceImpl implements IProductService {
             throw new InvalidParamException("Number of images be <= 5");
         }
         return productImageRepository.save(productImage);
+    }
+
+    public List<Product> searchProducts(String keyword) {
+        return productRepository.searchPhones(keyword);
     }
 }

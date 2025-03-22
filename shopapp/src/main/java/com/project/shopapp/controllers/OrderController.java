@@ -1,8 +1,12 @@
 package com.project.shopapp.controllers;
 
 import com.project.shopapp.dtos.OrderDTO;
+import com.project.shopapp.models.Order;
+import com.project.shopapp.responses.OrderResponse;
+import com.project.shopapp.services.Impl.OrderServiceImpl;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -12,31 +16,48 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${api.prefix}/orders")
+@RequiredArgsConstructor
 public class OrderController {
+    private final OrderServiceImpl orderService;
     @PostMapping("")
     //http://localhost:8088/api/v1/orders
-    public ResponseEntity<?> createOrder(@Valid @RequestBody OrderDTO orderDTO, BindingResult result) {
+    public ResponseEntity<?> createOrder(
+            @Valid @RequestBody OrderDTO orderDTO,
+            BindingResult result) {
         try {
             if(result.hasErrors()) {
                 List<String> errorMessages = result.getFieldErrors().stream().map(FieldError::getDefaultMessage)
                         .toList();
                 return ResponseEntity.badRequest().body(errorMessages.toString());
             }
-            return ResponseEntity.ok().body("createOrder");
+            OrderResponse newOrderResponse = orderService.createOrder(orderDTO);
+            //Convert tu newOrder sang newOrderResponse
+            return ResponseEntity.ok(newOrderResponse);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-
-    @GetMapping("/{user_id}") // Thêm biến đường dẫn "user_id"
-    //http://localhost:8088/api/v1/orders/4
-    public ResponseEntity<?> getOrders(@PathVariable("user_id") @Min(1) Long user_id) {
+    @GetMapping("/user/{user_id}") // Thêm biến đường dẫn "user_id"
+    //http://localhost:8088/api/v1/orders/user/4
+    public ResponseEntity<?> getOrderUserById(@PathVariable("user_id") @Min(1) Long user_id) {
       try {
-          return ResponseEntity.ok().body("Lấy ra danh sách order từ user_id: " + user_id);
+          List<OrderResponse> orders = orderService.findAllOrderByUserId(user_id);
+          return ResponseEntity.ok().body(orders);
       } catch (Exception e) {
           return ResponseEntity.badRequest().body(e.getMessage());
       }
+    }
+
+    @GetMapping("/{id}") // Thêm biến đường dẫn "user_id"
+    //http://localhost:8088/api/v1/orders/4
+    public ResponseEntity<?> getOrdersById(@PathVariable("id") @Min(1) Long orderId) {
+        try {
+            OrderResponse existingOrder = orderService.getOrder(orderId);
+            return ResponseEntity.ok().body(existingOrder);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")//cong viec cua admin
@@ -50,7 +71,8 @@ public class OrderController {
                         .toList();
                 return ResponseEntity.badRequest().body(errorMessages.toString());
             }
-            return ResponseEntity.ok().body("updateOrder successfully with: " + id);
+            OrderResponse order = orderService.updateOrder(id, orderDTO);
+            return ResponseEntity.ok().body("updateOrder successfully: " + order);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -59,6 +81,7 @@ public class OrderController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrder(@PathVariable @Min(1) Long id) {
         //xoa mem => cap truong truong active = false
+        orderService.deleteOrder(id);
         return ResponseEntity.ok().body("deleteOrder successfully with: " + id);
     }
 }

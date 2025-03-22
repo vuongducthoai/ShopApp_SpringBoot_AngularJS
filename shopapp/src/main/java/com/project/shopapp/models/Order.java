@@ -3,8 +3,7 @@ package com.project.shopapp.models;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Date;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "orders")
 @Builder
-public class Order extends BaseEntity{
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,7 +39,7 @@ public class Order extends BaseEntity{
     private String note;
 
     @Column(name = "order_date")
-    private LocalDateTime orderDate;
+    private LocalDate orderDate;
 
     @Column(name = "status", length = 20)
     private String status;
@@ -55,7 +54,7 @@ public class Order extends BaseEntity{
     private String shippingAddress;
 
     @Column(name = "shipping_date")
-    private Date shippingDate;
+    private LocalDate shippingDate;
 
     @Column(name = "tracking_number")
     private String trackingNumber;
@@ -63,15 +62,12 @@ public class Order extends BaseEntity{
     @Column(name = "payment_method")
     private String paymentMethod;
 
-    @Column(name = "payment_status")
-    private String paymentStatus;
-
-    @Column(name = "payment_date")
-    private Date paymentDate; // Khi nguoi dung thanh toan moi cap nhat
+//    @Column(name = "payment_status")
+//    private String paymentStatus;
+//
+//    @Column(name = "payment_date")
+//    private Date paymentDate; // Khi nguoi dung thanh toan moi cap nhat
 
     @Column(name = "active")
     private Boolean active; // Thuoc ve admin
-
-
-
 }

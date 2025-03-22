@@ -58,15 +58,22 @@ public class ProductController {
     }
 
 
+
+    @GetMapping("/allProduct")
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
+    }
+
     //http://localhost:8080/api/products/6
     @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(
             @PathVariable("id") Long productId
     ) {
-        Product existingProduct = null;
+        Product existingProduct;
         try {
             existingProduct = productService.getProductById(productId);
-            return ResponseEntity.ok(existingProduct);
+            return ResponseEntity.ok(ProductResponse.fromProduct(existingProduct));
         } catch (DataNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -74,7 +81,11 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable("id") long id) {
-        
+        try {
+            productService.deleteProduct(id);
+        } catch (DataNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return ResponseEntity.ok("Product deleted with ID: " + id);
     }
 
@@ -148,8 +159,6 @@ public class ProductController {
         return ResponseEntity.ok(productImageList);
     }
 
-
-
     public String storeFile(
             MultipartFile file
     ) throws IOException {
@@ -203,4 +212,24 @@ public class ProductController {
         }
         return ResponseEntity.ok("Fake Products created successfully");
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateProduct(
+            @PathVariable long id,
+            @RequestBody ProductDTO productDTO){
+
+        try {
+            Product updatedProduct = productService.updateProduct(id, productDTO);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/search")
+    public List<Product> searchPhones(@RequestParam String keyword) {
+        return productService.searchProducts(keyword);
+    }
+
 }
