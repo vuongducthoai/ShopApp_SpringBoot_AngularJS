@@ -1,6 +1,9 @@
 package com.project.shopapp.controllers;
 
 import com.project.shopapp.dtos.*;
+import com.project.shopapp.exception.DataNotFoundException;
+import com.project.shopapp.exception.InvalidParamException;
+import com.project.shopapp.models.User;
 import com.project.shopapp.services.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,18 +38,25 @@ public class UserController {
             if(!userDTO.getPassword().equals(userDTO.getRetypePassword())){
                 return ResponseEntity.badRequest().body("Password does not match");
             }
-            userService.createUser(userDTO);
-            return ResponseEntity.ok().body("Register successfully");
+            User user = userService.createUser(userDTO);
+            return ResponseEntity.ok().body(user);
         }catch(Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO userLoginDTO){
+    public ResponseEntity<String> login(
+            @Valid @RequestBody UserLoginDTO userLoginDTO){
         //Kiem tra thong tin dang nhap va sinh token
-         String token = userService.login(userLoginDTO.getPhoneNumber(), userLoginDTO.getPassword());
-        //Tra ve token trong reponse
-        return ResponseEntity.ok().body("some token");
+        try {
+            String token = userService.login(userLoginDTO.getPhoneNumber(), userLoginDTO.getPassword());
+            //Tra ve token trong reponse
+            return ResponseEntity.ok().body(token);
+        } catch (DataNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidParamException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

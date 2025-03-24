@@ -1,7 +1,9 @@
 package com.project.shopapp.services.Impl;
 
+import com.project.shopapp.component.JwtTokenUtil;
 import com.project.shopapp.dtos.UserDTO;
 import com.project.shopapp.exception.DataNotFoundException;
+import com.project.shopapp.exception.InvalidParamException;
 import com.project.shopapp.models.Role;
 import com.project.shopapp.models.User;
 import com.project.shopapp.repositories.RoleRepository;
@@ -9,13 +11,24 @@ import com.project.shopapp.repositories.UserRepository;
 import com.project.shopapp.services.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
 public class UserServiceImpl implements IUserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final AuthenticationManager authenticationManager;
+
+    //Register
     @Override
     public User createUser(UserDTO userDTO) throws DataNotFoundException {
         String phoneNumber = userDTO.getPhoneNumber();
@@ -33,20 +46,42 @@ public class UserServiceImpl implements IUserService {
                         .facebookAccountId(userDTO.getFacebookAccountId())
                         .googleAccountId(userDTO.getGoogleAccountId())
                         .build();
-        Role role =  roleRepository.findById(userDTO.getRoleId()).orElseThrow(() -> new DataNotFoundException("Role not found"));
+        Role role =  roleRepository.findById(userDTO.getRoleId())
+                .orElseThrow(()
+                        -> new DataNotFoundException("Role not found"));
         newUser.setRole(role);
 
         //Kiem tra neu co accountId, khong yeu cau password
         if(userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0) {
             String password = userDTO.getPassword();
+            String encodedPassword = passwordEncoder.encode(password);
+            newUser.setPassword(encodedPassword);
         }
-        userRepository.save(newUser);
-        return newUser;
+        return userRepository.save(newUser);
     }
 
+    //Login
     @Override
-    public String login(String phoneNumber, String password) {
-        //Doan loen quan nhieu den security, se lam trong phan security
-        return null;
+    public String login(String phoneNumber, String password) throws DataNotFoundException, InvalidParamException {
+        Optional<User> optionalUser =  userRepository.findByPhoneNumber(phoneNumber);
+        if(optionalUser.isEmpty()) {
+            throw new DataNotFoundException("Invalid phoneNumber or password");
+        }
+        User existingUser = optionalUser.get();
+        //check password
+        if(existingUser.getFacebookAccountId() == 0
+                && existingUser.getGoogleAccountId() == 0) {
+            if(!passwordEncoder.matches(password,
+                    existingUser.getPassword())) {
+                throw new BadCredentialsException("Wrong phone number or password");
+            }
+        }
+        UsernamePasswordAuthenticationToken authenticationToken
+                = new UsernamePasswordAuthenticationToken(
+                phoneNumber, password, existingUser.getAuthorities()
+        );
+        //authenticate with Java Spring security
+        authenticationManager.authenticate(authenticationToken);
+        return jwtTokenUtil.generateToken(existingUser);
     }
 }

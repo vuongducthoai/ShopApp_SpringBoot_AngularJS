@@ -37,10 +37,9 @@ public class SecurityConfig {
 
     /*
         Khi nguoi dung dang nhap, Spring Security se su dung DaoAuthenticationProvider de:
-          + Lay thong tin nguoi dung tu database thong qua UserDetailService
-          + So sanh mat khau nguoi dung nhap vao voi mat khau duoc ma hoa trong database
-          + Neu hop le, no cho phep nguoi dung dang nhap
-
+           + Lay thong tin nguoi dung tu database thong qua UserDetailService
+           + So sanh mat khau nguoi dung nhap vao voi mat khau duoc ma hoa trong database
+           + Neu hop le, no cho phep nguoi dung dang nhap
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -51,6 +50,7 @@ public class SecurityConfig {
         return daoAuthenticationProvider;
     }
 
+    //Method dung de xac thuc nguoi dung
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) {
@@ -60,8 +60,4 @@ public class SecurityConfig {
             throw new RuntimeException(e);
         }
     }
-
-
-
-
 }
