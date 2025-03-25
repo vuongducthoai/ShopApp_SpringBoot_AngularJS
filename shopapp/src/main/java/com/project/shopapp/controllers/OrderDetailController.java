@@ -1,7 +1,6 @@
 package com.project.shopapp.controllers;
 
 import com.project.shopapp.dtos.OrderDetailDTO;
-import com.project.shopapp.exception.DataNotFoundException;
 import com.project.shopapp.models.OrderDetail;
 import com.project.shopapp.responses.OrderDetailResponse;
 import com.project.shopapp.services.Impl.OrderDetailService;
@@ -11,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RestController

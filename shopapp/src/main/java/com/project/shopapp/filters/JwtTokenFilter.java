@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,13 +34,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
           @NotNull HttpServletResponse response,
           @NotNull  FilterChain filterChain)
             throws ServletException, IOException {
+            try {
+                if(isByPassToken(request)) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                extractTokenFromRequest(request, response);  //Request require token
+                filterChain.doFilter(request, response); // Request no require token
+            } catch (Exception e){
+                //SC_UNAUTHORIZED(Status Code Unauthorized): la mot hang so tuong ung voi ma trang thai HTTP 401.
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            }
 
-        if(isByPassToken(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        final String authHeader = request.getHeader("Authorization");
-          // filterChain.doFilter(request, response); // enable bypass
     }
 
     private boolean isByPassToken(@NotNull HttpServletRequest request) {
@@ -58,25 +64,48 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 return true;
             }
         }
+
         return false;
     }
 
 
     //Phương thức de lay token tu request (co the la tu header Authorization)
-    private String extractTokenFromRequest(HttpServletRequest request) {
+    private void extractTokenFromRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        /*
+           + Phương thức getHeader(String name) của đối tượng HttpServletRequest
+            sẽ trả về giá trị của header có tên là "Authorization" trong yêu cầu HTTP.
+           + Nếu header không tồn tại trong yeu cầu, phuong thức se tra ve null.
+           + Header Authorization thường có giá trị theo định dạng Bearer <token>,
+              trong đó <token> là thông tin xác thực, có thể là token JWT hoặc một dạng mã xác thực khác.
+
+         */
         final String authHeader = request.getHeader("Authorization");
         /*
             - authHeader != null: Kiem tra xem yeu cau co chua header Authorization khong
             - SecurityContextHolder.getContext().getAuthentication() == null: Kiem tra xem nguoi dung da duoc
               // xác thuc trong ung dung hay chua. Neu khong co toi tuong Authentication trong SecurityContext, co nghia la nguoi dung chua dc xac thuc
          */
-        if(authHeader != null && authHeader.startsWith("Bearer ")) {
+        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        }
+        if(authHeader.startsWith("Bearer ")) {
             final String token = authHeader.substring(7);
             final String phoneNumber = jwtTokenUtil.extractPhoneNumber(token);
             if(phoneNumber != null &&  SecurityContextHolder.getContext().getAuthentication() == null) {
              UserDetails existingUser = userDetailsService.loadUserByUsername(phoneNumber); // load tat ca thong tin cua nguoi dung tu co so du lieu
                 if(jwtTokenUtil.validateToken(token, existingUser)) {
-
+                    //* Doi tuong UsernamePasswordAuthenticationToken (la mot loai Authentication) de luu tru
+                       // thong tin xac thuc cua nguoi dung trong SecurityContext.
+                    /*
+                        + existingUser la doi tuong chua thong tin nguoi dung de duoc tai tu co so du lieu.
+                        + null duoc truyen vao cho mat khau vi khong can mat khau trong qua trinh xac thuc JWT (token thay the mat khau)
+                        + existingUser.getAuthorities() la danh sach cac quyen(roles/authorities)
+                         // cua nguoi dung, dieun ay se duoc su dung de phan quyen trong ung dung.
+                    */
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        existingUser, null, existingUser.getAuthorities()
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
         }

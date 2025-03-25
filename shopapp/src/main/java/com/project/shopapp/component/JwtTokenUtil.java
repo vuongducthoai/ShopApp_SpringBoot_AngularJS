@@ -61,7 +61,7 @@ public class JwtTokenUtil {
         return Jwts.parser() // Tao mot doi tuong JwtParser de xu ly JWT Token
                 .setSigningKey(getSignInKey()) //
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
     }
 
