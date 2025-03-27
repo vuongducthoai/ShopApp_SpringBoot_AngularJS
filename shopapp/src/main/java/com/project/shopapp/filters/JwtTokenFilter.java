@@ -1,6 +1,7 @@
 package com.project.shopapp.filters;
 
 import com.project.shopapp.component.JwtTokenUtil;
+import com.project.shopapp.models.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -92,7 +93,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             final String token = authHeader.substring(7);
             final String phoneNumber = jwtTokenUtil.extractPhoneNumber(token);
             if(phoneNumber != null &&  SecurityContextHolder.getContext().getAuthentication() == null) {
-             UserDetails existingUser = userDetailsService.loadUserByUsername(phoneNumber); // load tat ca thong tin cua nguoi dung tu co so du lieu
+             User existingUser = (User) userDetailsService.loadUserByUsername(phoneNumber); // load tat ca thong tin cua nguoi dung tu co so du lieu
                 if(jwtTokenUtil.validateToken(token, existingUser)) {
                     //* Doi tuong UsernamePasswordAuthenticationToken (la mot loai Authentication) de luu tru
                        // thong tin xac thuc cua nguoi dung trong SecurityContext.
@@ -100,7 +101,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                         + existingUser la doi tuong chua thong tin nguoi dung de duoc tai tu co so du lieu.
                         + null duoc truyen vao cho mat khau vi khong can mat khau trong qua trinh xac thuc JWT (token thay the mat khau)
                         + existingUser.getAuthorities() la danh sach cac quyen(roles/authorities)
-                         // cua nguoi dung, dieun ay se duoc su dung de phan quyen trong ung dung.
+                         // cua nguoi dung, dieu nay se duoc su dung de phan quyen trong ung dung.
                     */
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         existingUser, null, existingUser.getAuthorities()
