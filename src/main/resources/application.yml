@@ -1,0 +1,52 @@
+server:
+  port: 8088
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/shopapp?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: Thoai12309@
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: true
+  security:
+    oath2:
+      client:
+        registration:
+          google:
+            client_id: 365652132286-tltuur6ie1eoh7v2k3t0fib61n4ab3ms.apps.googleusercontent.com
+            client_secret:
+            redirect-uri:
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            resource-server:
+              opaque-token:
+                introspection-uri: "https://googleapis.com"
+
+api:
+  prefix: /api/v1
+jwt:
+  expiration: 2592000
+  secretKey: r868/ekChLVjTpei1zYQeRpQyslRVxc7wUTPrePy5DA=
+
+app:
+  email:
+    username: thoai12309@gmail.com
+    password: pacu wkwk syni algi
+
+
+vnpay:
+  pay-url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  return-url: "${VNPAY_RETURN_URI:http://localhost:4200/payments/payment-callback}"
+  tmn-code: "SV3NIZS0"
+  secret-key: "UBWHAK6G3Z6AASS98KRP9N3TT9KL5ET4"
+  api-url: "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction"
